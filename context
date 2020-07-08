@@ -1,3 +1,0 @@
-Il faut passer l'objet/class property en mode staticmethod/classmethod mais conflit avec @property
-
-Une possibilité: faire le liking dans le décorateur @pykorm.k8s_custom_object

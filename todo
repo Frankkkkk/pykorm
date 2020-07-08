@@ -1,0 +1,7 @@
+Implement save() -> (create or update)
+Implement delete
+Implement some filtering
+
+Implement Namespaced objects
+
+Implement relations ? One-to-One and Many-to-One ?

@@ -8,7 +8,8 @@ from . import fields
 
 
 class PykormModel:
-    name: str = None
+    name: str = fields.Metadata('name')
+
     _k8s_uid = None
     _pykorm_group: str = None
     _pykorm_version: str = None
@@ -24,14 +25,11 @@ class PykormModel:
         attributes = inspect.getmembers(cls, lambda a:not(inspect.isroutine(a)))
         obj_attrs = [a for a in attributes if not(a[0].startswith('__') and a[0].endswith('__'))]
 
-        print('\n\nBIG FOR')
         for (attr_name, attr_value) in obj_attrs:
             if isinstance(attr_value, fields.DataField):
                 print(f'{attr_name} is a field !!')
                 value = attr_value.get_data(k8s_dict)
                 obj.__dict__[attr_name] = value
-        print(obj)
-        print(obj.__dict__)
         # XXX TODO: fill attributes of obj with k8s dict
         return obj
 

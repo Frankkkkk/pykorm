@@ -9,3 +9,10 @@ class Spec(DataField):
 
     def get_data(self, k8s_dict):
         return k8s_dict['spec'][self.path]
+
+@dataclass
+class Metadata(DataField):
+    path: str
+
+    def get_data(self, k8s_dict):
+        return k8s_dict['metadata'][self.path]
