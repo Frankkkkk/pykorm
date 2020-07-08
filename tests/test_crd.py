@@ -1,15 +1,45 @@
-class CustCR(pykorm.CustomObject('ch.pykorm', 'v1', 'custCR')):
-    the_spec = pykorm.fields.Spec('.the_spec')
-    the_annotation = pykorm.fields.Metadata('.annotations.the_annotation')
+import time
+
+import kubernetes
+
+import pykorm
 
 
-    def __init__(self, name, the_spec):
-        self.name = name
-        self.the_spec = the_spec
+@pykorm.k8s_custom_object('pykorm.infomaniak.com', 'v1', 'apples')
+class Apple(pykorm.ClusterModel):
+    variety: str = pykorm.fields.Spec('variety')
+    time_bought: str #= pykorm.fields.Metadata('.annotations.bought_at')
 
 
+def test_empty():
 
-pk = pykorm()
+    pykorm.Pykorm()
 
-ccr1 = CustCR('ccr1', 'ts1')
-pk.save(ccr1)
+    assert len(list(Apple.query.all())) == 0
+
+def test_read():
+    apple_js = {
+        "apiVersion": "pykorm.infomaniak.com/v1",
+        "kind": "Apple",
+        "metadata": {
+            "name": "good-apple",
+        },
+        "spec": {
+            "variety": "Gala",
+        }
+    }
+    api = kubernetes.client.CustomObjectsApi()
+    try:
+        api.create_cluster_custom_object('pykorm.infomaniak.com', 'v1', 'apples', apple_js)
+    except:
+        pass
+
+    all_apples = list(Apple.query.all())
+
+    assert len(all_apples) == 1
+    apple = all_apples[0]
+
+    assert apple.variety == 'Gala'
+
+#apple = Apple('Gala', time.time())
+#pk.save(apple)
