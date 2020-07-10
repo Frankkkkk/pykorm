@@ -1,13 +1,18 @@
 import abc
+
+from typing import TYPE_CHECKING, Iterator
+if TYPE_CHECKING:
+    from .models import PykormModel
+
 import kubernetes
 
 def _custom_objects_api():
     return kubernetes.client.CustomObjectsApi()
 
 class BaseQuery:
-    baseobject: type = None
+    baseobject: 'PykormModel' = None
 
-    def __init__(self, baseobject: type):
+    def __init__(self, baseobject: 'PykormModel'):
         self.baseobject = baseobject
 
     @abc.abstractmethod
@@ -25,7 +30,7 @@ class NamespacedObjectQuery(BaseQuery):
 
 
 class ClusterObjectQuery(BaseQuery):
-    def _iter(self):
+    def _iter(self) -> Iterator['PykormModel']:
         api = _custom_objects_api()
         base_cls = self.baseobject
 
@@ -42,5 +47,6 @@ class ClusterObjectQuery(BaseQuery):
         print(k8s_dict)
 
         _result = api.create_cluster_custom_object(obj._pykorm_group, obj._pykorm_version, obj._pykorm_plural, k8s_dict)
+        print(_result)
         # XXX save result to obj
 

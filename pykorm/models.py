@@ -51,7 +51,7 @@ class PykormModel:
 
 
     @classmethod
-    def _instantiate_with_dict(cls, k8s_dict):
+    def _instantiate_with_dict(cls, k8s_dict) -> 'PykormModel':
         ''' Creates the model with data from the k8s data structure '''
         obj = cls.__new__(cls)
         obj.__k8s_data = k8s_dict
@@ -77,7 +77,7 @@ class PykormModel:
 
         for (attr_name, attr_type) in self._get_pykorm_attributes():
             attr_value = getattr(self, attr_name)
-            attr_dict_path = attr_type.as_k8s_path(attr_value)
+            attr_dict_path = attr_type.to_dict(attr_value)
             print(f'I also have {attr_name}→{attr_value} = {attr_type}')
             print(attr_dict_path)
             d = dict_deep_merge(d, attr_dict_path)

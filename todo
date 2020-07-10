@@ -1,4 +1,4 @@
-CONTEXT: Implement save() -> (create or update)
+CONTEXT: Implement save() -> (update)
 
 
 Implement delete
