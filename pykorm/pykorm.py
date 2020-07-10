@@ -41,3 +41,6 @@ class Pykorm:
     def save(self, obj: models.PykormModel):
         obj.query._save(obj)
 
+    def delete(self, obj: models.PykormModel):
+        obj.query._delete(obj)
+

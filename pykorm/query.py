@@ -52,3 +52,7 @@ class ClusterObjectQuery(BaseQuery):
         obj._set_attributes_with_dict(result)
 
 
+    def _delete(self, obj: 'PykormModel'):
+        api = _custom_objects_api()
+        api.delete_cluster_custom_object(obj._pykorm_group, obj._pykorm_version, obj._pykorm_plural, obj.name)
+

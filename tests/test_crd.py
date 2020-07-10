@@ -92,3 +92,11 @@ def test_setattr_uid(pk, remove_all_apples):
 
     with pytest.raises(Exception):
         a._k8s_uid = 'hello'
+
+
+def test_delete(pk, remove_all_apples):
+    a = Apple('a', 'b')
+    pk.save(a)
+    pk.delete(a)
+
+    assert list(Apple.query.all()) == []
