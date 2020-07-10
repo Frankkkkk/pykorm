@@ -3,43 +3,8 @@ import inspect
 import kubernetes
 
 from . import query as pykorm_query
-from . import fields
+from . import models
 
-
-
-class PykormModel:
-    name: str = fields.Metadata('name')
-
-    _k8s_uid = None
-    _pykorm_group: str = None
-    _pykorm_version: str = None
-    _pykorm_plural: str = None
-
-    query: pykorm_query.BaseQuery = None
-
-    @classmethod
-    def _instantiate_with_dict(cls, k8s_dict):
-        obj = cls()
-        obj.__k8s_data = k8s_dict
-
-        attributes = inspect.getmembers(cls, lambda a:not(inspect.isroutine(a)))
-        obj_attrs = [a for a in attributes if not(a[0].startswith('__') and a[0].endswith('__'))]
-
-        for (attr_name, attr_value) in obj_attrs:
-            if isinstance(attr_value, fields.DataField):
-                print(f'{attr_name} is a field !!')
-                value = attr_value.get_data(k8s_dict)
-                obj.__dict__[attr_name] = value
-        # XXX TODO: fill attributes of obj with k8s dict
-        return obj
-
-
-class NamespacedModel(PykormModel):
-    namespace: str = None
-
-
-class ClusterModel(PykormModel):
-    pass
 
 
 def _process_cls(cls, query_class, group: str, version: str, plural: str):
@@ -52,9 +17,9 @@ def _process_cls(cls, query_class, group: str, version: str, plural: str):
 
 def k8s_custom_object(group: str, version: str, plural: str):
     def wrap(cls):
-        if issubclass(cls, ClusterModel):
+        if issubclass(cls, models.ClusterModel):
             query_class = pykorm_query.ClusterObjectQuery
-        elif issubclass(cls, NamespacedModel):
+        elif issubclass(cls, models.NamespacedModel):
             query_class = pykorm_query.NamespacedObjectQuery
         else:
             raise Exception(f"Class {cls} doesn't seem to inherit from either ClusterModel nor NamespacedModel")
@@ -73,12 +38,6 @@ class Pykorm:
         except:  # XXX
             kubernetes.config.load_incluster_config()
 
+    def save(self, obj: models.PykormModel):
+        obj.query._save(obj)
 
-
-
-
-
-@k8s_custom_object(group='group', version='version', plural='plural')
-class MyDB(NamespacedModel):
-    def quack(self):
-        print('Quack !')

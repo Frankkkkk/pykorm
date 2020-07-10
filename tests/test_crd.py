@@ -5,11 +5,19 @@ import pytest
 
 import pykorm
 
+from dataclasses import dataclass
+
 
 @pykorm.k8s_custom_object('pykorm.infomaniak.com', 'v1', 'apples')
 class Apple(pykorm.ClusterModel):
     variety: str = pykorm.fields.Spec('variety')
-    time_bought: str #= pykorm.fields.Metadata('.annotations.bought_at')
+
+    def __init__(self, name:str, variety:str):
+        self.name == name
+        self.variety == variety
+
+    def __eq__(self, other):
+        return self.variety == other.variety and self.name == other.name
 
 
 @pytest.fixture
@@ -58,7 +66,8 @@ def test_create(pk):
 
     pk.save(cake_apple)
 
-    pass
+    all_apples = Apple.query.all()
+    assert [cake_apple] == all_apples
 
 #apple = Apple('Gala', time.time())
 #pk.save(apple)
