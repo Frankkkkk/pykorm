@@ -1,10 +1,9 @@
 from setuptools import setup
 from setuptools import find_packages
-import pykorm
 
 setup(
     name='pykorm',
-    version=pykorm.__version__,
+    version='0.43',
     description='Pykorm: a dead simple Kubernetes ORM',
     url='https://github.com/Frankkkkk/pykorm',
     author='Frank Villaro-Dixon - Infomaniak Network SA',
