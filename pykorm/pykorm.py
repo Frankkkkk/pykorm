@@ -1,5 +1,3 @@
-import inspect
-
 import kubernetes
 
 from . import query as pykorm_query

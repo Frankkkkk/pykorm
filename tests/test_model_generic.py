@@ -9,3 +9,4 @@ def test_setattr_uid(pk):
 
     with pytest.raises(Exception):
         a._k8s_uid = 'hello'
+

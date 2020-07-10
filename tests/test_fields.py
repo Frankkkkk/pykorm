@@ -1,5 +1,6 @@
 from pykorm import fields
 
+
 def test_metadata_to_dict():
     md = fields.Metadata('hello.foo.bar')
     wanted = {
@@ -13,6 +14,7 @@ def test_metadata_to_dict():
     }
 
     assert md.to_dict('42') == wanted
+
 
 def test_metadata_get_data():
     md = fields.Metadata('.annotations.foo.bar')

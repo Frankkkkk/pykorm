@@ -12,7 +12,7 @@ import pykorm
 class Apple(pykorm.ClusterModel):
     variety: str = pykorm.fields.Spec('variety')
 
-    def __init__(self, name:str, variety:str):
+    def __init__(self, name: str, variety: str):
         self.name = name
         self.variety = variety
 
@@ -24,7 +24,7 @@ class Apple(pykorm.ClusterModel):
 class Peach(pykorm.NamespacedModel):
     variety: str = pykorm.fields.Spec('variety')
 
-    def __init__(self, namespace: str, name:str, variety:str):
+    def __init__(self, namespace: str, name: str, variety: str):
         self.namespace = namespace
         self.name = name
         self.variety = variety
@@ -32,9 +32,11 @@ class Peach(pykorm.NamespacedModel):
     def __eq__(self, other):
         return self.namespace == other.namespace and self.variety == other.variety and self.name == other.name
 
+
 @pytest.fixture
 def random_name():
     return uuid.uuid4().hex
+
 
 @pytest.fixture
 def custom_objects_api():
@@ -51,6 +53,7 @@ def remove_all_apples(custom_objects_api):
     apples = custom_objects_api.list_cluster_custom_object('pykorm.infomaniak.com', 'v1', 'apples')
     for apple in apples['items']:
         custom_objects_api.delete_cluster_custom_object('pykorm.infomaniak.com', 'v1', 'apples', apple['metadata']['name'])
+
 
 def remove_all_peaches(custom_objects_api):
     corev1 = kubernetes.client.CoreV1Api()

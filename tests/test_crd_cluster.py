@@ -1,10 +1,4 @@
-import time
-
-import kubernetes
-import pytest
-
 from conftest import Apple
-
 
 
 def test_empty():

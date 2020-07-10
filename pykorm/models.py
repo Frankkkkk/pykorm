@@ -33,7 +33,7 @@ class PykormModel:
 
     @classmethod
     def _get_pykorm_attributes(cls) -> List[Tuple[str, fields.DataField]]:
-        attributes = inspect.getmembers(cls, lambda a:not(inspect.isroutine(a)))
+        attributes = inspect.getmembers(cls, lambda a: not(inspect.isroutine(a)))
         obj_attrs = [a for a in attributes if not(a[0].startswith('__') and a[0].endswith('__'))]
 
         retl = []
@@ -47,10 +47,11 @@ class PykormModel:
     def __setattr__(self, item: str, value):
         for (attr_name, attr) in self._get_pykorm_attributes():
             if item == attr_name:
-                if attr.readonly and getattr(self, item) != None:
+                if attr.readonly and getattr(self, item) is not None:
                     # We allow to set the attribute if it was not set before
                     raise Exception(f'{attr_name} attribute is read_only !')
         self.__dict__[item] = value
+
 
     def __getattribute__(self, item: str):
         attr = object.__getattribute__(self, item)

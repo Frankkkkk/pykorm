@@ -1,5 +1,6 @@
 from typing import Dict
 
+
 class DataField:
     _root_dict_key: str = None
     path: str = None
@@ -36,6 +37,7 @@ class DataField:
 
 class Spec(DataField):
     _root_dict_key = 'spec'
+
 
 class Metadata(DataField):
     _root_dict_key = 'metadata'

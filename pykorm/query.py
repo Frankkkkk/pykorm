@@ -1,13 +1,16 @@
 import abc
-
 from typing import TYPE_CHECKING, Iterator
-if TYPE_CHECKING:
-    from .models import PykormModel, NamespacedModel, ClusterModel
 
 import kubernetes
 
+if TYPE_CHECKING:
+    from .models import PykormModel, NamespacedModel, ClusterModel
+
+
+
 def _custom_objects_api():
     return kubernetes.client.CustomObjectsApi()
+
 
 def _coreV1_api():
     return kubernetes.client.CoreV1Api()
@@ -48,7 +51,7 @@ class NamespacedObjectQuery(BaseQuery):
 
         k8s_dict = obj._k8s_dict
 
-        if obj._k8s_uid == None:
+        if obj._k8s_uid is None:
             result = api.create_namespaced_custom_object(obj._pykorm_group, obj._pykorm_version, obj.namespace, obj._pykorm_plural, k8s_dict)
         else:
             result = api.patch_namespaced_custom_object(obj._pykorm_group, obj._pykorm_version, obj.namespace, obj._pykorm_plural, obj.name, k8s_dict)
@@ -77,7 +80,7 @@ class ClusterObjectQuery(BaseQuery):
 
         k8s_dict = obj._k8s_dict
 
-        if obj._k8s_uid == None:
+        if obj._k8s_uid is None:
             result = api.create_cluster_custom_object(obj._pykorm_group, obj._pykorm_version, obj._pykorm_plural, k8s_dict)
         else:
             result = api.patch_cluster_custom_object(obj._pykorm_group, obj._pykorm_version, obj._pykorm_plural, obj.name, k8s_dict)

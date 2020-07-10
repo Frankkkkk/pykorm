@@ -1,8 +1,3 @@
-import time
-
-import kubernetes
-import pytest
-
 from conftest import Peach
 
 
@@ -62,4 +57,4 @@ def test_delete(pk):
     assert list(Peach.query.all()) == []
 
 
-# XXX test raises when no namespace
+#  XXX test raises when no namespace
