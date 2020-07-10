@@ -2,12 +2,16 @@ import abc
 
 from typing import TYPE_CHECKING, Iterator
 if TYPE_CHECKING:
-    from .models import PykormModel
+    from .models import PykormModel, NamespacedModel, ClusterModel
 
 import kubernetes
 
 def _custom_objects_api():
     return kubernetes.client.CustomObjectsApi()
+
+def _coreV1_api():
+    return kubernetes.client.CoreV1Api()
+
 
 class BaseQuery:
     baseobject: 'PykormModel' = None
@@ -19,18 +23,47 @@ class BaseQuery:
     def _iter(self):
         raise Exception('Not implemented')
 
-    def all(self):
+    def all(self) -> Iterator['PykormModel']:
         for el in self._iter():
             yield el
 
 
 
 class NamespacedObjectQuery(BaseQuery):
-    pass
+    def _iter(self) -> Iterator['NamespacedModel']:
+        api = _custom_objects_api()
+        corev1 = _coreV1_api()
+        base_cls = self.baseobject
+
+
+        for namespace in corev1.list_namespace().items:
+            ns_name = namespace.metadata.name
+            objs = api.list_namespaced_custom_object(base_cls._pykorm_group, base_cls._pykorm_version, ns_name, base_cls._pykorm_plural)
+            for obj in objs['items']:
+                yield self.baseobject._instantiate_with_dict(obj)
+
+
+    def _save(self, obj: 'NamespacedModel'):
+        api = _custom_objects_api()
+
+        k8s_dict = obj._k8s_dict
+
+        if obj._k8s_uid == None:
+            result = api.create_namespaced_custom_object(obj._pykorm_group, obj._pykorm_version, obj.namespace, obj._pykorm_plural, k8s_dict)
+        else:
+            result = api.patch_namespaced_custom_object(obj._pykorm_group, obj._pykorm_version, obj.namespace, obj._pykorm_plural, obj.name, k8s_dict)
+
+        obj._set_attributes_with_dict(result)
+
+
+    def _delete(self, obj: 'NamespacedModel'):
+        api = _custom_objects_api()
+        api.delete_namespaced_custom_object(obj._pykorm_group, obj._pykorm_version, obj.namespace, obj._pykorm_plural, obj.name)
+
 
 
 class ClusterObjectQuery(BaseQuery):
-    def _iter(self) -> Iterator['PykormModel']:
+    def _iter(self) -> Iterator['ClusterModel']:
         api = _custom_objects_api()
         base_cls = self.baseobject
 
@@ -39,7 +72,7 @@ class ClusterObjectQuery(BaseQuery):
             yield self.baseobject._instantiate_with_dict(obj)
 
 
-    def _save(self, obj: 'PykormModel'):
+    def _save(self, obj: 'ClusterModel'):
         api = _custom_objects_api()
 
         k8s_dict = obj._k8s_dict
@@ -52,7 +85,8 @@ class ClusterObjectQuery(BaseQuery):
         obj._set_attributes_with_dict(result)
 
 
-    def _delete(self, obj: 'PykormModel'):
+    def _delete(self, obj: 'ClusterModel'):
         api = _custom_objects_api()
         api.delete_cluster_custom_object(obj._pykorm_group, obj._pykorm_version, obj._pykorm_plural, obj.name)
+
 
