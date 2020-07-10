@@ -1,22 +1,22 @@
-from dataclasses import dataclass
 from typing import Dict
 
 class DataField:
     _root_dict_key: str = None
     path: str = None
+    readonly: bool = False
 
-    def __init__(self, path: str):
+    def __init__(self, path: str, readonly: bool = False):
         self.path = path.strip('.')
+        self.readonly = readonly
 
     def __repr__(self) -> str:
         cls_name = self.__class__.__name__
         return f'<pykorm/{cls_name}: {self.path}>'
 
     def to_dict(self, value: str) -> Dict:
-        leaf = value
-
         path = self.path
 
+        leaf = value
         for dict_item in reversed(path.split('.')):
             leaf = {dict_item: leaf}
 
@@ -39,3 +39,4 @@ class Spec(DataField):
 
 class Metadata(DataField):
     _root_dict_key = 'metadata'
+

@@ -1,36 +1,30 @@
 import inspect
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 
 from . import fields
 from . import query as pykorm_query
 
 
-def dict_deep_merge(source, destination):
+def dict_deep_merge(source: Dict, extra: Dict) -> Dict:
     """
-    run me with nosetests --with-doctest file.py
-
-    >>> a = { 'first' : { 'all_rows' : { 'pass' : 'dog', 'number' : '1' } } }
-    >>> b = { 'first' : { 'all_rows' : { 'fail' : 'cat', 'number' : '5' } } }
-    >>> merge(b, a) == { 'first' : { 'all_rows' : { 'pass' : 'dog', 'fail' : 'cat', 'number' : '5' } } }
-    True
+    deep merges two dicts together
     """
     for key, value in source.items():
         if isinstance(value, dict):
             # get node or create one
-            node = destination.setdefault(key, {})
+            node = extra.setdefault(key, {})
             dict_deep_merge(value, node)
         else:
-            destination[key] = value
+            extra[key] = value
 
-    return destination
-
+    return extra
 
 
 
 class PykormModel:
-    name: str = fields.Metadata('name')
+    name: str = fields.Metadata('name', readonly=True)
+    _k8s_uid: str = fields.Metadata('uid', readonly=True)
 
-    _k8s_uid = None
     _pykorm_group: str = None
     _pykorm_version: str = None
     _pykorm_plural: str = None
@@ -44,27 +38,49 @@ class PykormModel:
 
         retl = []
         for obj in obj_attrs:
-            (_attr_name, attr_value) = obj
-            if isinstance(attr_value, fields.DataField):
+            (_attr_name, attr) = obj
+            if isinstance(attr, fields.DataField):
                 retl.append(obj)
         return retl
+
+
+    def __setattr__(self, item: str, value):
+        for (attr_name, attr) in self._get_pykorm_attributes():
+            if item == attr_name:
+                if attr.readonly and getattr(self, item) != None:
+                    # We allow to set the attribute if it was not set before
+                    raise Exception(f'{attr_name} attribute is read_only !')
+        self.__dict__[item] = value
+
+    def __getattribute__(self, item: str):
+        attr = object.__getattribute__(self, item)
+
+        if isinstance(attr, fields.DataField):
+            return None
+        else:
+            return attr
 
 
     @classmethod
     def _instantiate_with_dict(cls, k8s_dict) -> 'PykormModel':
         ''' Creates the model with data from the k8s data structure '''
         obj = cls.__new__(cls)
-        obj.__k8s_data = k8s_dict
-
-        for (attr_name, attr_value) in cls._get_pykorm_attributes():
-            print(f'{attr_name} is a field !!')
-            value = attr_value.get_data(k8s_dict)
-            obj.__dict__[attr_name] = value
+        obj._set_attributes_with_dict(k8s_dict)
         return obj
+
+    def _set_attributes_with_dict(self, k8s_dict: Dict):
+        self.__k8s_data = k8s_dict
+
+        for (attr_name, attr_value) in self._get_pykorm_attributes():
+            value = attr_value.get_data(k8s_dict)
+            self.__dict__[attr_name] = value
 
 
     @property
     def _k8s_dict(self):
+        '''
+        Returns the model as a kubernetes dict/yaml structure
+        '''
         d = {
             "apiVersion": f'{self._pykorm_group}/{self._pykorm_version}',
             "kind": self.__class__.__name__,
@@ -77,19 +93,14 @@ class PykormModel:
 
         for (attr_name, attr_type) in self._get_pykorm_attributes():
             attr_value = getattr(self, attr_name)
-            attr_dict_path = attr_type.to_dict(attr_value)
-            print(f'I also have {attr_name}→{attr_value} = {attr_type}')
-            print(attr_dict_path)
-            d = dict_deep_merge(d, attr_dict_path)
+            if not isinstance(attr_value, fields.DataField):
+                attr_dict_path = attr_type.to_dict(attr_value)
+                d = dict_deep_merge(d, attr_dict_path)
         return d
+
 
 class NamespacedModel(PykormModel):
     namespace: str = fields.Metadata('namespace')
-
-    @property
-    def _k8s_dict(self):
-        d = super(PykormModel, self).__k8s_dict
-        d['metadata']['namespace'] = self.namespace
 
 
 class ClusterModel(PykormModel):

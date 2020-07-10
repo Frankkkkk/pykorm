@@ -61,7 +61,7 @@ def test_read(custom_objects_api, remove_all_apples):
     assert apple.variety == 'Gala'
 
 
-def test_create(pk):
+def test_create(pk, remove_all_apples):
     cake_apple = Apple(name='cake-apple', variety='Golden')
     print(cake_apple)
     print(cake_apple.name)
@@ -71,5 +71,24 @@ def test_create(pk):
     all_apples = Apple.query.all()
     assert [cake_apple] == list(all_apples)
 
-#apple = Apple('Gala', time.time())
-#pk.save(apple)
+
+def test_update(pk, remove_all_apples):
+    a = Apple('rotten', 'Cameo')
+    pk.save(a)
+
+    a.variety = 'Old Cameo'
+    pk.save(a)
+
+
+    all_apples = Apple.query.all()
+    assert [a] == list(all_apples)
+
+
+
+def test_setattr_uid(pk, remove_all_apples):
+    """ We shouldn't be able to set the model._k8s_uid attribute """
+    a = Apple('a', 'b')
+    pk.save(a)
+
+    with pytest.raises(Exception):
+        a._k8s_uid = 'hello'
