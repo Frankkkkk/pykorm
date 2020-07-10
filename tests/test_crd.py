@@ -13,8 +13,8 @@ class Apple(pykorm.ClusterModel):
     variety: str = pykorm.fields.Spec('variety')
 
     def __init__(self, name:str, variety:str):
-        self.name == name
-        self.variety == variety
+        self.name = name
+        self.variety = variety
 
     def __eq__(self, other):
         return self.variety == other.variety and self.name == other.name
@@ -63,11 +63,13 @@ def test_read(custom_objects_api, remove_all_apples):
 
 def test_create(pk):
     cake_apple = Apple(name='cake-apple', variety='Golden')
+    print(cake_apple)
+    print(cake_apple.name)
 
     pk.save(cake_apple)
 
     all_apples = Apple.query.all()
-    assert [cake_apple] == all_apples
+    assert [cake_apple] == list(all_apples)
 
 #apple = Apple('Gala', time.time())
 #pk.save(apple)

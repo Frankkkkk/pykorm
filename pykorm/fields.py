@@ -1,18 +1,31 @@
 from dataclasses import dataclass
 
 class DataField:
-    pass
+    _root_dict_key: str = None
+    path: str = None
 
-@dataclass
+    def __init__(self, path: str):
+        self.path = path
+
+    def as_k8s_path(self, value: str):
+        leaf = value
+
+        print(f'My path is {self.path}')
+
+        path = self.path.strip('.')
+
+        for dict_item in reversed(path.split('.')):
+            leaf = {dict_item: leaf}
+
+        return {self._root_dict_key: leaf}
+
+
+    def get_data(self, k8s_dict):
+        return k8s_dict[self._root_dict_key][self.path]
+
+
 class Spec(DataField):
-    path: str
+    _root_dict_key = 'spec'
 
-    def get_data(self, k8s_dict):
-        return k8s_dict['spec'][self.path]
-
-@dataclass
 class Metadata(DataField):
-    path: str
-
-    def get_data(self, k8s_dict):
-        return k8s_dict['metadata'][self.path]
+    _root_dict_key = 'metadata'

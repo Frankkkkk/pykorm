@@ -37,7 +37,9 @@ class ClusterObjectQuery(BaseQuery):
     def _save(self, obj): #: pykorm.ClusterModel):
         api = _custom_objects_api()
 
-        k8s_dict = obj._to_k8s_dict()
+        k8s_dict = obj._k8s_dict
+
+        print(k8s_dict)
 
         _result = api.create_cluster_custom_object(obj._pykorm_group, obj._pykorm_version, obj._pykorm_plural, k8s_dict)
         # XXX save result to obj
