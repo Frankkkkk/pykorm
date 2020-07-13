@@ -70,6 +70,12 @@ class PykormModel:
         else:
             return attr
 
+    def _matches_attributes(self, filters_dict: Dict[str, str]) -> bool:
+        for attribute_name, attribute_value in filters_dict.items():
+            if getattr(self, attribute_name) != attribute_value:
+                return False
+        return True
+
 
     @classmethod
     def _instantiate_with_dict(cls, k8s_dict) -> 'PykormModel':

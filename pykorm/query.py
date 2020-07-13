@@ -1,5 +1,5 @@
 import abc
-from typing import TYPE_CHECKING, Iterator
+from typing import TYPE_CHECKING, Iterator, Dict
 
 import kubernetes
 
@@ -25,6 +25,13 @@ class BaseQuery:
     @abc.abstractmethod
     def _iter(self):
         raise Exception('Not implemented')
+
+
+    def filter_by(self, **kwargs: str) -> Iterator['PykormModel']:
+        for el in self._iter():
+            if el._matches_attributes(kwargs):
+                yield el
+
 
     def all(self) -> Iterator['PykormModel']:
         for el in self._iter():
