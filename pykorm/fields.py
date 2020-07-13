@@ -26,12 +26,9 @@ class DataField:
 
     def get_data(self, k8s_dict: Dict) -> str:
         full_path = self._root_dict_key + '.' + self.path
-        print(f'My full path is {full_path}')
-        print(k8s_dict)
 
         for elem in full_path.split('.'):
             k8s_dict = k8s_dict[elem]
-            print(f'Got {elem} -> {k8s_dict}')
         return k8s_dict
 
 
