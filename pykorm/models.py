@@ -43,6 +43,15 @@ class PykormModel:
                 retl.append(obj)
         return retl
 
+    def __repr__(self):
+        repr_dict = {}
+        for (attr_name, _) in self._get_pykorm_attributes():
+            repr_dict[attr_name] = getattr(self, attr_name)
+
+        repr_str = [f'{k}={v}' for k, v in repr_dict.items()]
+
+        return f'<{self.__class__.__name__} {" ".join(repr_str)}>'
+
 
     def __setattr__(self, item: str, value):
         for (attr_name, attr) in self._get_pykorm_attributes():
