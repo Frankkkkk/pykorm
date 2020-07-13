@@ -25,11 +25,11 @@ class PykormModel:
     name: str = fields.Metadata('name', readonly=True)
     _k8s_uid: str = fields.Metadata('uid', readonly=True)
 
-    _pykorm_group: str = None
-    _pykorm_version: str = None
-    _pykorm_plural: str = None
+    _pykorm_group: str
+    _pykorm_version: str
+    _pykorm_plural: str
 
-    query: pykorm_query.BaseQuery = None
+    query: pykorm_query.BaseQuery
 
     @classmethod
     def _get_pykorm_attributes(cls) -> List[Tuple[str, fields.DataField]]:
@@ -116,7 +116,7 @@ class PykormModel:
 
 
 class NamespacedModel(PykormModel):
-    namespace: str = fields.Metadata('namespace')
+    namespace = fields.Metadata('namespace')
 
 
 class ClusterModel(PykormModel):

@@ -2,8 +2,8 @@ from typing import Dict
 
 
 class DataField:
-    _root_dict_key: str = None
-    path: str = None
+    _root_dict_key: str
+    path: str
     readonly: bool = False
 
     def __init__(self, path: str, readonly: bool = False):
@@ -24,7 +24,7 @@ class DataField:
         return {self._root_dict_key: leaf}
 
 
-    def get_data(self, k8s_dict: Dict) -> str:
+    def get_data(self, k8s_dict: Dict):
         full_path = self._root_dict_key + '.' + self.path
 
         for elem in full_path.split('.'):

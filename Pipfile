@@ -10,6 +10,8 @@ pylint = "*"
 kubernetes = "*"
 pytest = "*"
 kubetest = "*"
+mypy-lang = "*"
+mypy = "*"
 
 [requires]
 python_version = "3.8"

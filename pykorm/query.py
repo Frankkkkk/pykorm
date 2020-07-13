@@ -1,5 +1,4 @@
-import abc
-from typing import TYPE_CHECKING, Iterator, Dict
+from typing import TYPE_CHECKING, Iterator
 
 import kubernetes
 
@@ -17,15 +16,10 @@ def _coreV1_api():
 
 
 class BaseQuery:
-    baseobject: 'PykormModel' = None
+    baseobject: 'PykormModel'
 
     def __init__(self, baseobject: 'PykormModel'):
         self.baseobject = baseobject
-
-    @abc.abstractmethod
-    def _iter(self):
-        raise Exception('Not implemented')
-
 
     def filter_by(self, **kwargs: str) -> Iterator['PykormModel']:
         for el in self._iter():
