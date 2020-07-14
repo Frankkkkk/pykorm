@@ -3,7 +3,7 @@ from setuptools import find_packages
 
 setup(
     name='pykorm',
-    version='0.43',
+    version='0.44',
     description='Pykorm: a dead simple Kubernetes ORM',
     url='https://github.com/Frankkkkk/pykorm',
     author='Frank Villaro-Dixon - Infomaniak Network SA',
