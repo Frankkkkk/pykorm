@@ -27,6 +27,24 @@ def test_read(custom_objects_api):
     assert apple.variety == 'Gala'
 
 
+def test_read_default(custom_objects_api):
+    apple_js = {
+        "apiVersion": "pykorm.infomaniak.com/v1",
+        "kind": "Apple",
+        "metadata": {
+            "name": "tasty-apple",
+        },
+        "spec": {
+            "variety": "variety"
+        }
+    }
+    custom_objects_api.create_cluster_custom_object('pykorm.infomaniak.com', 'v1', 'apples', apple_js)
+
+    apple = list(Apple.query.all())[0]
+
+    assert apple.tastyness == 'very-tasty'
+
+
 def test_create(pk):
     cake_apple = Apple(name='cake-apple', variety='Golden')
 

@@ -10,7 +10,8 @@ import pykorm
 
 @pykorm.k8s_custom_object('pykorm.infomaniak.com', 'v1', 'apples')
 class Apple(pykorm.ClusterModel):
-    variety: str = pykorm.fields.Spec('variety')
+    variety: str = pykorm.fields.Spec('variety', 'default-variety')
+    tastyness: str = pykorm.fields.MetadataAnnotation('tastyness', 'very-tasty')
 
     def __init__(self, name: str, variety: str):
         self.name = name
@@ -22,7 +23,8 @@ class Apple(pykorm.ClusterModel):
 
 @pykorm.k8s_custom_object('pykorm.infomaniak.com', 'v1', 'peaches')
 class Peach(pykorm.NamespacedModel):
-    variety: str = pykorm.fields.Spec('variety')
+    variety: str = pykorm.fields.Spec('variety', 'default-variety')
+    tastyness: str = pykorm.fields.MetadataAnnotation('tastyness', 'very-tasty')
 
     def __init__(self, namespace: str, name: str, variety: str):
         self.namespace = namespace
