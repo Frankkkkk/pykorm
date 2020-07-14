@@ -37,3 +37,43 @@ def test_metadata_get_data():
     }
 
     assert md.get_data(k8s_js) == wanted
+
+
+def test_metadata_get_data_default():
+    md = fields.Metadata('.annotations.default', 'yeah')
+
+    k8s_js = {
+        'spec': {
+            'random': 'true',
+        },
+        'metadata': {
+            'useless': 'yes',
+        }
+    }
+
+    assert md.get_data(k8s_js) == 'yeah'
+
+    k8s_js['metadata']['annotations'] = {'default': 'works'}
+    assert md.get_data(k8s_js) == 'works'
+
+
+def test_metadata_annotations_field():
+    md = fields.MetadataAnnotation('ch.infomaniak.pykorm/foo.bar')
+
+    k8s_js = {
+        'spec': {
+            'random': 'true',
+        },
+        'metadata': {
+            'annotations': {
+                'ch.infomaniak.pykorm/foo.bar': 'baz'
+            }
+        }
+    }
+
+    assert md.get_data(k8s_js) == 'baz'
+
+
+def test_metadata_annotations_field_default():
+    md = fields.MetadataAnnotation('ch.infomaniak.pykorm/foo.bar', 'default')
+    assert md.get_data({}) == 'default'
