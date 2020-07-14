@@ -3,11 +3,12 @@
 
 import pykorm
 
+
 @pykorm.k8s_custom_object('pykorm.infomaniak.com', 'v1', 'peaches')
 class Peach(pykorm.NamespacedModel):
     variety: str = pykorm.fields.Spec('variety')
 
-    def __init__(self, namespace: str, name:str, variety:str):
+    def __init__(self, namespace: str, name: str, variety: str):
         self.namespace = namespace
         self.name = name
         self.variety = variety
@@ -15,7 +16,7 @@ class Peach(pykorm.NamespacedModel):
 
 pk = pykorm.Pykorm()
 cake_peach = Peach(namespace='default', name='cake-peach', variety='Frost')
-#pk.save(cake_peach)
+# pk.save(cake_peach)
 
 for peach in Peach.query.all():
     print(str(peach))
