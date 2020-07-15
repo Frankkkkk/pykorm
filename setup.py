@@ -1,10 +1,17 @@
 from setuptools import setup
 from setuptools import find_packages
+from os import path
+
+this_directory = path.abspath(path.dirname(__file__))
+with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
+    long_description = f.read()
 
 setup(
     name='pykorm',
-    version='0.45',
+    version='0.45.1',
     description='Pykorm: a dead simple Kubernetes ORM',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     url='https://github.com/Frankkkkk/pykorm',
     author='Frank Villaro-Dixon - Infomaniak Network SA',
     author_email='frank.villaro@infomaniak.com',
