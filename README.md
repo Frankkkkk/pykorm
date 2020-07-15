@@ -7,7 +7,11 @@ cluster and modifications are thus reflected both ways.
 
 # Examples
 ## Namespaced Custom Resource
-### Kubernetes example
+### Setup
+First of all, you need to have Custom Resource Definitions on your cluster.  
+This README will use the following Namespaced resource. You can apply it on your 
+cluster with `kubectl`.
+
 ```yaml
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
@@ -47,8 +51,8 @@ spec:
 
 ### Class definition
 In order to link a python class to a kubernetes CustomResourceDefinition,
-you need to inherit the class from pykorm's one and annotate it with the
-kubernetes CRD information:
+you need to inherit the class from pykorm's `NamespacedModel` or `ClusterModel` 
+and annotate it with the kubernetes CRD information like so:
 ```python
 import pykorm
 
@@ -62,9 +66,12 @@ class Peach(pykorm.NamespacedModel):
         self.variety = variety
 ```
 
+Notice that a class inheriting from `pykorm.NamespacedModel` already has the 
+`name` and `namespace` fields setup.
+
 ### Create a CR
 In order to create a kubernetes custom resource from python, you just
-have to instantiate the class and save it with `pykorm`:
+have to instantiate the class and save it with `Pykorm.save()`:
 ```python
 import pykorm
 pk = pykorm.Pykorm()
@@ -88,6 +95,14 @@ Pykorm can also list resources from kubernetes
 <Peach namespace=default, name=cake-peach, variety=Frost>
 ```
 
+You can even filter resources by some criterion:
+```python
+>>> Peach.query.filter_by(name='cake-peach')
+[<Peach namespace=default, name=cake-peach, variety=Frost>]
+>>> Peach.query.filter_by(namespace='kube-system')
+[]
+```
+
 ### Delete resources
 You can delete a resource with `pykorm` too:
 ```python
@@ -102,12 +117,15 @@ No resources found in default namespace.
 For more examples, don't hesitate to look into the `examples/` directory
 
 
-# Where is pykorm
-pykorm is still very young and very naive missing quite a lot of features (filtering, relationships, etc.).
-It was originally created because a lot of boilerplate code was written each time a custom object
-had to be interfaced with kubernetes.
+# Is pykorm stable ?
+pykorm is still very young and very naive. It's also missing quite a lot of 
+features (relationships, etc.).
+It was originally created because a lot of boilerplate code was written each
+time a kubernetes custom object had to be interfaced with python 
+code.
 
-Work on `pykorm` is actually on the way. Don't hesitate to contribute to the project if you have the energy for it !
+Work on `pykorm` is actually on the way. Don't hesitate to contribute to the 
+project if you have the energy for it !
 
 ## Limitations
 As of now, pykorm only supports CustomResourceDefinitions (as accessed by the `kubernetes.client.CustomObjectsApi` API)
