@@ -17,9 +17,6 @@ class Apple(pykorm.ClusterModel):
         self.name = name
         self.variety = variety
 
-    def __eq__(self, other):
-        return self.variety == other.variety and self.name == other.name
-
 
 @pykorm.k8s_custom_object('pykorm.infomaniak.com', 'v1', 'peaches')
 class Peach(pykorm.NamespacedModel):
@@ -30,9 +27,6 @@ class Peach(pykorm.NamespacedModel):
         self.namespace = namespace
         self.name = name
         self.variety = variety
-
-    def __eq__(self, other):
-        return self.namespace == other.namespace and self.variety == other.variety and self.name == other.name
 
 
 @pytest.fixture

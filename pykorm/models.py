@@ -77,6 +77,13 @@ class PykormModel:
         return True
 
 
+    def __eq__(self, other):
+        if self.__class__ != other.__class__:
+            return False
+
+        return self._k8s_dict == other._k8s_dict
+
+
     @classmethod
     def _instantiate_with_dict(cls, k8s_dict) -> 'PykormModel':
         ''' Creates the model with data from the k8s data structure '''
