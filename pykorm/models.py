@@ -116,7 +116,7 @@ class PykormModel:
 
         for (attr_name, attr_type) in self._get_pykorm_attributes():
             attr_value = getattr(self, attr_name)
-            if not isinstance(attr_value, fields.DataField):
+            if not isinstance(attr_value, fields.DataField) and attr_value is not None:
                 attr_dict_path = attr_type.to_dict(attr_value)
                 d = dict_deep_merge(d, attr_dict_path)
         return d
