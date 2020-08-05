@@ -63,3 +63,6 @@ class MetadataAnnotation(DataField):
     _split_dots = False
 
 
+class Status(DataField):
+    _root_dict_key = 'status'
+
