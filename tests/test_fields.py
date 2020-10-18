@@ -1,8 +1,50 @@
+from conftest import Score
+
 from pykorm import fields
 
 
+def test_nested_field_to_dict():
+    md = fields.DictNestedField(Score, path='spec@score')
+    wanted = {
+        'spec': {
+            'score': {
+                'delicious': 10
+            }
+        }
+    }
+    assert md.to_dict(Score(delicious=10)) == wanted
+
+
+def test_nested_field_get_data():
+    md = fields.DictNestedField(Score, path='spec@score')
+
+    wanted = Score(delicious=10)
+    k8s_js = {
+        'spec': {
+            'score': {
+                'delicious': 10
+            }
+        }
+    }
+
+    assert md.get_data(k8s_js) == wanted
+
+
+def test_nested_field_get_data_default():
+    md = fields.DictNestedField(Score, path='spec@score')
+
+    k8s_js = {
+        'spec': {
+            'score': {
+            }
+        }
+    }
+
+    assert md.get_data(k8s_js).delicious == 10
+
+
 def test_metadata_to_dict():
-    md = fields.Metadata('hello.foo.bar')
+    md = fields.Metadata('hello@foo@bar')
     wanted = {
         'metadata': {
             'hello': {
@@ -17,7 +59,7 @@ def test_metadata_to_dict():
 
 
 def test_metadata_get_data():
-    md = fields.Metadata('.annotations.foo.bar')
+    md = fields.Metadata('annotations@foo@bar')
 
     wanted = 'YEAHMAN'
     k8s_js = {
@@ -40,7 +82,7 @@ def test_metadata_get_data():
 
 
 def test_metadata_get_data_default():
-    md = fields.Metadata('.annotations.default', 'yeah')
+    md = fields.Metadata('annotations@default', 'yeah')
 
     k8s_js = {
         'spec': {

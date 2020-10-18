@@ -4,7 +4,7 @@ from conftest import Apple, Peach
 
 def test_setattr_uid(pk):
     """ We shouldn't be able to set the model._k8s_uid attribute """
-    a = Apple('a', 'b')
+    a = Apple(name='a', variety='b')
     pk.save(a)
 
     with pytest.raises(Exception):
@@ -34,4 +34,3 @@ def test_model_compare_attrs(pk):
 
     pk.save(a)
     assert list(Apple.query.all()) == [a]
-

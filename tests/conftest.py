@@ -6,27 +6,23 @@ import pytest
 import pykorm
 
 
+class Score(pykorm.models.NestedField):
+    exterior: int = pykorm.fields.DataField('exterior')
+    delicious: int = pykorm.fields.DataField('delicious', 10)
+
+
+class ScoreMixin(object):
+    score: Score = pykorm.fields.DictNestedField(Score, path='spec@score')
 
 
 @pykorm.k8s_custom_object('pykorm.infomaniak.com', 'v1', 'apples')
-class Apple(pykorm.ClusterModel):
+class Apple(ScoreMixin, pykorm.ClusterModel):
     variety: str = pykorm.fields.Spec('variety', 'default-variety')
-    tastyness: str = pykorm.fields.MetadataAnnotation('tastyness', 'very-tasty')
-
-    def __init__(self, name: str, variety: str):
-        self.name = name
-        self.variety = variety
 
 
 @pykorm.k8s_custom_object('pykorm.infomaniak.com', 'v1', 'peaches')
-class Peach(pykorm.NamespacedModel):
+class Peach(ScoreMixin, pykorm.NamespacedModel):
     variety: str = pykorm.fields.Spec('variety', 'default-variety')
-    tastyness: str = pykorm.fields.MetadataAnnotation('tastyness', 'very-tasty')
-
-    def __init__(self, namespace: str, name: str, variety: str):
-        self.namespace = namespace
-        self.name = name
-        self.variety = variety
 
 
 @pytest.fixture
@@ -48,7 +44,8 @@ def pk():
 def remove_all_apples(custom_objects_api):
     apples = custom_objects_api.list_cluster_custom_object('pykorm.infomaniak.com', 'v1', 'apples')
     for apple in apples['items']:
-        custom_objects_api.delete_cluster_custom_object('pykorm.infomaniak.com', 'v1', 'apples', apple['metadata']['name'])
+        custom_objects_api.delete_cluster_custom_object('pykorm.infomaniak.com', 'v1', 'apples',
+                                                        apple['metadata']['name'])
 
 
 def remove_all_peaches(custom_objects_api):
@@ -58,8 +55,8 @@ def remove_all_peaches(custom_objects_api):
         ns_name = ns.metadata.name
         peaches = custom_objects_api.list_namespaced_custom_object('pykorm.infomaniak.com', 'v1', ns_name, 'peaches')
         for peach in peaches['items']:
-            custom_objects_api.delete_namespaced_custom_object('pykorm.infomaniak.com', 'v1', ns_name, 'peaches', peach['metadata']['name'])
-
+            custom_objects_api.delete_namespaced_custom_object('pykorm.infomaniak.com', 'v1', ns_name, 'peaches',
+                                                               peach['metadata']['name'])
 
 
 @pytest.fixture(autouse=True, scope='function')

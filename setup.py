@@ -1,6 +1,7 @@
-from setuptools import setup
-from setuptools import find_packages
 from os import path
+
+from setuptools import find_packages
+from setuptools import setup
 
 this_directory = path.abspath(path.dirname(__file__))
 with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
@@ -8,7 +9,7 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='pykorm',
-    version='0.47.0',
+    version='0.50.0',
     description='Pykorm: a dead simple Kubernetes ORM',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -19,7 +20,7 @@ setup(
     packages=find_packages(),
     zip_safe=False,
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Beta",
         "Environment :: Console",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
@@ -29,5 +30,4 @@ setup(
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
     python_requires=">=3.7",
-    install_requires=['kubernetes'])
-
+    install_requires=['kubernetes==11.0', 'dpath'])
