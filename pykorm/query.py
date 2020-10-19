@@ -39,14 +39,14 @@ class Node(object):
 class BaseQuery(Node):
     baseobject: 'PykormModel'
 
-    def __init__(self, baseobject: 'PykormModel', api, overwrite_api_client=None):
+    def __init__(self, baseobject: 'PykormModel', api):
         self.baseobject = baseobject
         self._next_filter = []
         self._label_filters = {}
         self._field_filters = {}
         self._api = api
         self._current_cluster = 'default'
-        self._overwrite_api_client = overwrite_api_client
+        self._overwrite_api_client = None
         self._overwrite_api_client_mapping = {}
 
     @property
@@ -80,10 +80,10 @@ class BaseQuery(Node):
         return isinstance(self.api, kubernetes.client.CustomObjectsApi)
 
     def __call__(self, *args, **kwargs):
-        overwrite_api_client = None
         if 'overwrite_api_client' in kwargs:
-            overwrite_api_client = kwargs['overwrite_api_client']
-        return self.__class__(self.baseobject, self.api, overwrite_api_client=overwrite_api_client)
+            self._overwrite_api_client = kwargs['overwrite_api_client']
+            self._reset_api_client()
+        return self.__class__(self.baseobject, self.api)
 
     @property
     def api_resource_name(self):
