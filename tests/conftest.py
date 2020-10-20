@@ -12,6 +12,7 @@ import pykorm
 class Apple(pykorm.ClusterModel):
     variety: str = pykorm.fields.Spec('variety', 'default-variety')
     tastyness: str = pykorm.fields.MetadataAnnotation('tastyness', 'very-tasty')
+    creationTimestamp: str = pykorm.fields.Metadata('creationTimestamp', readonly=True)
 
     def __init__(self, name: str, variety: str):
         self.name = name

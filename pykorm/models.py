@@ -55,11 +55,18 @@ class PykormModel:
 
     def __setattr__(self, item: str, value):
         pk_attrs = self._get_pykorm_attributes()
+
         if item in pk_attrs:
             attr = pk_attrs[item]
-            if attr.readonly and getattr(self, item) is not None:
+            now_value = getattr(self, item)
+
+            if now_value is None:
+                # Value not previously set, we can set it once (ex: model.name)
+                pass
+            elif attr.readonly and not isinstance(now_value, fields.DataField):
                 # We allow to set the attribute if it was not set before
                 raise Exception(f'{item} attribute is read_only !')
+
         self.__dict__[item] = value
 
 
@@ -67,7 +74,7 @@ class PykormModel:
         attr = object.__getattribute__(self, item)
 
         if isinstance(attr, fields.DataField):
-            return None
+            return attr.default
         else:
             return attr
 
@@ -103,7 +110,8 @@ class PykormModel:
     @property
     def _k8s_dict(self):
         '''
-        Returns the model as a kubernetes dict/yaml structure
+        Returns the model as a kubernetes dict/yaml structure. This function
+        does NOT return readonly fields
         '''
         d = {
             "apiVersion": f'{self._pykorm_group}/{self._pykorm_version}',
@@ -117,7 +125,12 @@ class PykormModel:
 
         for (attr_name, attr_type) in self._get_pykorm_attributes().items():
             attr_value = getattr(self, attr_name)
-            if not isinstance(attr_value, fields.DataField):
+
+            if attr_type.readonly:
+                continue
+            elif isinstance(attr_value, fields.DataField):
+                attr_value = attr_type.default
+            else:
                 attr_dict_path = attr_type.to_dict(attr_value)
                 d = dict_deep_merge(d, attr_dict_path)
         return d
