@@ -176,6 +176,7 @@ class BaseQuery(Node):
             result = self.patch_method(**kwargs)
 
         obj._set_attributes_with_dict(self.process_http_response(result))
+        obj._queryset = self
 
     def _apply(self, obj: 'PykormModel'):
         k8s_dict = obj._k8s_dict
