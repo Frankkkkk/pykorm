@@ -1,5 +1,5 @@
 import inspect
-from typing import List, Tuple, Dict
+from typing import Dict
 
 from . import fields
 from . import query as pykorm_query
@@ -32,20 +32,20 @@ class PykormModel:
     query: pykorm_query.BaseQuery
 
     @classmethod
-    def _get_pykorm_attributes(cls) -> List[Tuple[str, fields.DataField]]:
+    def _get_pykorm_attributes(cls) -> Dict[str, fields.DataField]:
         attributes = inspect.getmembers(cls, lambda a: not(inspect.isroutine(a)))
         obj_attrs = [a for a in attributes if not(a[0].startswith('__') and a[0].endswith('__'))]
 
-        retl = []
+        retd = {}
         for obj in obj_attrs:
-            (_attr_name, attr) = obj
+            (attr_name, attr) = obj
             if isinstance(attr, fields.DataField):
-                retl.append(obj)
-        return retl
+                retd[attr_name] = attr
+        return retd
 
     def __repr__(self):
         repr_dict = {}
-        for (attr_name, _) in self._get_pykorm_attributes():
+        for attr_name in self._get_pykorm_attributes():
             repr_dict[attr_name] = getattr(self, attr_name)
 
         repr_str = [f'{k}={v}' for k, v in repr_dict.items()]
@@ -54,11 +54,12 @@ class PykormModel:
 
 
     def __setattr__(self, item: str, value):
-        for (attr_name, attr) in self._get_pykorm_attributes():
-            if item == attr_name:
-                if attr.readonly and getattr(self, item) is not None:
-                    # We allow to set the attribute if it was not set before
-                    raise Exception(f'{attr_name} attribute is read_only !')
+        pk_attrs = self._get_pykorm_attributes()
+        if item in pk_attrs:
+            attr = pk_attrs[item]
+            if attr.readonly and getattr(self, item) is not None:
+                # We allow to set the attribute if it was not set before
+                raise Exception(f'{item} attribute is read_only !')
         self.__dict__[item] = value
 
 
@@ -94,7 +95,7 @@ class PykormModel:
     def _set_attributes_with_dict(self, k8s_dict: Dict):
         self.__k8s_data = k8s_dict
 
-        for (attr_name, attr_value) in self._get_pykorm_attributes():
+        for (attr_name, attr_value) in self._get_pykorm_attributes().items():
             value = attr_value.get_data(k8s_dict)
             self.__dict__[attr_name] = value
 
@@ -114,7 +115,7 @@ class PykormModel:
             }
         }
 
-        for (attr_name, attr_type) in self._get_pykorm_attributes():
+        for (attr_name, attr_type) in self._get_pykorm_attributes().items():
             attr_value = getattr(self, attr_name)
             if not isinstance(attr_value, fields.DataField):
                 attr_dict_path = attr_type.to_dict(attr_value)
