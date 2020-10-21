@@ -1,0 +1,2 @@
+class ReadOnlyException(Exception):
+    pass

@@ -35,14 +35,12 @@ def test_read_default(custom_objects_api):
             "name": "tasty-apple",
         },
         "spec": {
-            "variety": "variety"
+            "variety": "variety",
         }
     }
     custom_objects_api.create_cluster_custom_object('pykorm.infomaniak.com', 'v1', 'apples', apple_js)
-
     apple = list(Apple.query.all())[0]
-
-    assert apple.tastyness == 'very-tasty'
+    assert(apple.tastyness == 'very-tasty')
 
 
 def test_create(pk):
@@ -55,20 +53,18 @@ def test_create(pk):
 
 
 def test_update(pk):
-    a = Apple('rotten', 'Cameo')
+    a = Apple(name='rotten', variety='Cameo')
     pk.save(a)
 
     a.variety = 'Old Cameo'
     pk.save(a)
 
-
     all_apples = Apple.query.all()
     assert [a] == list(all_apples)
 
 
-
 def test_delete(pk):
-    a = Apple('a', 'b')
+    a = Apple(name='a', variety='b')
     pk.save(a)
     pk.delete(a)
 

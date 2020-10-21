@@ -1,82 +1,43 @@
-import inspect
 from typing import Dict
+
+import dpath.util
 
 from . import fields
 from . import query as pykorm_query
+from .meta import ModelMixin
+
+IGNORE_HIDDEN_ATTRIBUTE = True
 
 
-def dict_deep_merge(source: Dict, extra: Dict) -> Dict:
-    """
-    deep merges two dicts together
-    """
-    for key, value in source.items():
-        if isinstance(value, dict):
-            # get node or create one
-            node = extra.setdefault(key, {})
-            dict_deep_merge(value, node)
-        else:
-            extra[key] = value
-
-    return extra
-
-
-
-class PykormModel:
+class PykormModel(ModelMixin):
     name: str = fields.Metadata('name', readonly=True)
+    created_at: str = fields.Metadata('creationTimestamp', readonly=True)
     _k8s_uid: str = fields.Metadata('uid', readonly=True)
 
     _pykorm_group: str
     _pykorm_version: str
     _pykorm_plural: str
+    _pykorm_kind: str
+    _property_fields: dict = {}
 
-    query: pykorm_query.BaseQuery
+    _queryset: pykorm_query.BaseQuery
 
     @classmethod
-    def _get_pykorm_attributes(cls) -> Dict[str, fields.DataField]:
-        attributes = inspect.getmembers(cls, lambda a: not(inspect.isroutine(a)))
-        obj_attrs = [a for a in attributes if not(a[0].startswith('__') and a[0].endswith('__'))]
+    def process_labels(cls, d: Dict[str, str]) -> str:
+        ''' Converts a labels_dict to a k=v,k=v string '''
+        return ','.join([f'{k}={v}' for k, v in d.items()])
 
-        retd = {}
-        for obj in obj_attrs:
-            (attr_name, attr) = obj
-            if isinstance(attr, fields.DataField):
-                retd[attr_name] = attr
-        return retd
+    def to_dict(self):
+        data = {}
+        for attr_name, _ in self._get_attributes().items():
+            v = getattr(self, attr_name)
+            if v is None:
+                continue
+            data[attr_name] = v
+        for attr_name, _attr_method in self._property_fields.items():
+            data[attr_name] = getattr(self, attr_name)
 
-    def __repr__(self):
-        repr_dict = {}
-        for attr_name in self._get_pykorm_attributes():
-            repr_dict[attr_name] = getattr(self, attr_name)
-
-        repr_str = [f'{k}={v}' for k, v in repr_dict.items()]
-
-        return f'<{self.__class__.__name__} {" ".join(repr_str)}>'
-
-
-    def __setattr__(self, item: str, value):
-        pk_attrs = self._get_pykorm_attributes()
-
-        if item in pk_attrs:
-            attr = pk_attrs[item]
-            now_value = getattr(self, item)
-
-            if now_value is None:
-                # Value not previously set, we can set it once (ex: model.name)
-                pass
-            elif attr.readonly and not isinstance(now_value, fields.DataField):
-                # We allow to set the attribute if it was not set before
-                raise Exception(f'{item} attribute is read_only !')
-
-        self.__dict__[item] = value
-
-
-    def __getattribute__(self, item: str):
-        attr = object.__getattribute__(self, item)
-
-        if isinstance(attr, fields.DataField):
-            return attr.default
-        else:
-            return attr
+        return {k: v for k, v in data.items() if not (k.startswith('_') and IGNORE_HIDDEN_ATTRIBUTE)}
 
     def _matches_attributes(self, filters_dict: Dict[str, str]) -> bool:
         for attribute_name, attribute_value in filters_dict.items():
@@ -84,26 +45,32 @@ class PykormModel:
                 return False
         return True
 
-
     def __eq__(self, other):
         if self.__class__ != other.__class__:
             return False
-
         return self._k8s_dict == other._k8s_dict
 
 
+    def __hash__(self):
+        return hash(self._k8s_uid)
+
+
+
     @classmethod
-    def _instantiate_with_dict(cls, k8s_dict) -> 'PykormModel':
+    def _instantiate_with_dict(cls, k8s_dict, queryset) -> 'PykormModel':
         ''' Creates the model with data from the k8s data structure '''
         obj = cls.__new__(cls)
         obj._set_attributes_with_dict(k8s_dict)
+        obj._queryset = queryset
         return obj
+
 
     def _set_attributes_with_dict(self, k8s_dict: Dict):
         self.__k8s_data = k8s_dict
+        self._k8s_dict_cached = {}
 
-        for (attr_name, attr_value) in self._get_pykorm_attributes().items():
-            value = attr_value.get_data(k8s_dict)
+        for (attr_name, attr) in self._get_attributes().items():
+            value = attr.get_data(k8s_dict)
             self.__dict__[attr_name] = value
 
 
@@ -113,27 +80,41 @@ class PykormModel:
         Returns the model as a kubernetes dict/yaml structure. This function
         does NOT return readonly fields
         '''
+        if self._pykorm_group:
+            api_version = f'{self._pykorm_group}/{self._pykorm_version}'
+        else:
+            api_version = self._pykorm_version
+
         d = {
-            "apiVersion": f'{self._pykorm_group}/{self._pykorm_version}',
-            "kind": self.__class__.__name__,
+            "apiVersion": api_version,
+            "kind": self._pykorm_kind or self.__class__.__name__,
             "metadata": {
                 "name": self.name,
             },
-            "spec": {
-            }
         }
 
-        for (attr_name, attr_type) in self._get_pykorm_attributes().items():
+        for (attr_name, attr_type) in self._get_attributes().items():
             attr_value = getattr(self, attr_name)
 
-            if attr_type.readonly:
+            if attr_type.required and not attr_value:
+                raise Exception(f"Field {attr_name} must be set")
+
+            if attr_type.readonly:  # Skip readonly field
                 continue
-            elif isinstance(attr_value, fields.DataField):
-                attr_value = attr_type.default
-            else:
-                attr_dict_path = attr_type.to_dict(attr_value)
-                d = dict_deep_merge(d, attr_dict_path)
+
+            attr_dict_path = attr_type.to_dict(attr_value)
+            d = dpath.util.merge(attr_dict_path, d)
+
         return d
+
+    def delete(self):
+        return self._queryset._delete(self)
+
+    def save(self):
+        return self._queryset._save(self)
+
+    def apply(self):
+        return self._queryset._apply(self)
 
 
 class NamespacedModel(PykormModel):

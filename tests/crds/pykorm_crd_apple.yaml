@@ -24,7 +24,7 @@ spec:
               variety:
                 type: string
             required:
-              - variety
+            - variety
 
 
     additionalPrinterColumns:
