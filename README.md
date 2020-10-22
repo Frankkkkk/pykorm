@@ -59,11 +59,6 @@ import pykorm
 @pykorm.k8s_custom_object('pykorm.infomaniak.com', 'v1', 'peaches')
 class Peach(pykorm.NamespacedModel):
     variety: str = pykorm.fields.Spec('variety')
-
-    def __init__(self, namespace: str, name:str, variety:str):
-        self.namespace = namespace
-        self.name = name
-        self.variety = variety
 ```
 
 Notice that a class inheriting from `pykorm.NamespacedModel` already has the 
@@ -77,7 +72,7 @@ import pykorm
 pk = pykorm.Pykorm()
 
 cake_peach = Peach(namespace='default', name='cake-peach', variety='Frost')
-pk.save(cake_peach)
+pk.save(cake_peach) # pk.apply(cake_peach) # you can apply resource
 ```
 as you can see, the model is instantly ensured in kubernetes:
 ```bash
@@ -93,13 +88,16 @@ Pykorm can also list resources from kubernetes
 >>> for peach in all_peaches:
 >>>  print(peach)
 <Peach namespace=default, name=cake-peach, variety=Frost>
+
+# Filter by namespace
+>>> Peach.query.filter_by(namespace='default').filter_by(variety='Frost').all()
 ```
 
 You can even filter resources by some criterion:
 ```python
->>> Peach.query.filter_by(name='cake-peach')
+>>> Peach.query.filter_by(name='cake-peach').all()
 [<Peach namespace=default, name=cake-peach, variety=Frost>]
->>> Peach.query.filter_by(namespace='kube-system')
+>>> Peach.query.filter_by(namespace='kube-system').all()
 []
 ```
 
@@ -116,6 +114,11 @@ No resources found in default namespace.
 ## More examples
 For more examples, don't hesitate to look into the `examples/` directory
 
+* [CoreAPI Wrapper](./examples/core_api.py)
+* [Multi Layer Nested & Mixin Fields](./examples/nested_example.py)
+* [Label Filter & Field Selector](./examples/filter_example.py)
+* [Multi Cluster](./examples/multi_cluster_example.py)
+
 
 # Is pykorm stable ?
 pykorm is still very young and very naive. It's also missing quite a lot of 
@@ -127,9 +130,6 @@ code.
 Work on `pykorm` is actually on the way. Don't hesitate to contribute to the 
 project if you have the energy for it !
 
-## Limitations
-As of now, pykorm only supports CustomResourceDefinitions (as accessed by the `kubernetes.client.CustomObjectsApi` API)
-and doesn't yet work with "native" resources like `Node`, `Deployment`, `Service`, etc.
 
 
 ## Equivalences

@@ -6,13 +6,13 @@ verify_ssl = true
 [dev-packages]
 pylint = "*"
 twine = "*"
-
-[packages]
-kubernetes = "*"
-pytest = "*"
-kubetest = "*"
 mypy-lang = "*"
 mypy = "*"
+pytest = "*"
+kubetest = "*"
+
+[packages]
+kubernetes = ">=11.0"
 
 [requires]
-python_version = "3.8"
+python_version = "3.7"

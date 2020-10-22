@@ -2,7 +2,7 @@ from pykorm import fields
 
 
 def test_metadata_to_dict():
-    md = fields.Metadata('hello.foo.bar')
+    md = fields.Metadata(['hello', 'foo', 'bar'])
     wanted = {
         'metadata': {
             'hello': {
@@ -17,9 +17,8 @@ def test_metadata_to_dict():
 
 
 def test_metadata_get_data():
-    md = fields.Metadata('.annotations.foo.bar')
+    md = fields.Metadata(['annotations', 'foo', 'bar'])
 
-    wanted = 'YEAHMAN'
     k8s_js = {
         'spec': {
             'random': 'true',
@@ -30,17 +29,17 @@ def test_metadata_get_data():
                 'this-is-getting': 'tiresome',
                 'foo': {
                     'last': 'one',
-                    'bar': wanted,
+                    'bar': 'YEAH',
                 }
             }
         }
     }
 
-    assert md.get_data(k8s_js) == wanted
+    assert md.get_data(k8s_js) == 'YEAH'
 
 
 def test_metadata_get_data_default():
-    md = fields.Metadata('.annotations.default', 'yeah')
+    md = fields.Metadata(['annotations', 'default'], default='yeah')
 
     k8s_js = {
         'spec': {

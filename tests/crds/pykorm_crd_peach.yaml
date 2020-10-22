@@ -23,8 +23,10 @@ spec:
             properties:
               variety:
                 type: string
+              price:
+                type: integer
             required:
-              - variety
+            - variety
 
 
     additionalPrinterColumns:
