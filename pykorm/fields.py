@@ -70,4 +70,4 @@ class MetadataAnnotation(DataField):
 
 
 class Status(DataField):
-    _root_dict_key = 'status'
+    _root_dict_key = ['status']
