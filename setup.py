@@ -20,7 +20,7 @@ setup(
     packages=find_packages(),
     zip_safe=False,
     classifiers=[
-        "Development Status :: 5 - Beta",
+        "Development Status :: 4 - Beta",
         "Environment :: Console",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
