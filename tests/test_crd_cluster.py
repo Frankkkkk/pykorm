@@ -36,11 +36,14 @@ def test_read_default(custom_objects_api):
         },
         "spec": {
             "variety": "variety",
+            'score': {
+                'exterior': 9
+            }
         }
     }
     custom_objects_api.create_cluster_custom_object('pykorm.infomaniak.com', 'v1', 'apples', apple_js)
     apple = list(Apple.query.all())[0]
-    assert(apple.tastyness == 'very-tasty')
+    assert apple.score.delicious == 10
 
 
 def test_create(pk):
