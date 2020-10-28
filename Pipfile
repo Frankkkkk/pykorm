@@ -13,6 +13,7 @@ kubetest = "*"
 
 [packages]
 kubernetes = ">=11.0"
+dpath = "*"
 
 [requires]
 python_version = "3.7"
