@@ -1,5 +1,5 @@
 import pytest
-from conftest import Apple, Peach
+from conftest import Apple, Peach, assertIsSubsetOf
 
 
 def test_setattr_readonly(pk):
@@ -68,7 +68,7 @@ def test_model_k8s_dict(pk):
         },
     }
 
-    assert expected_dict.items() <= a_k8s_dict.items()
+    assertIsSubsetOf(expected_dict, a_k8s_dict)
 
 
 def test_model_compare_model(pk):

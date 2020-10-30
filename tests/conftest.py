@@ -65,3 +65,16 @@ def remove_all_peaches(custom_objects_api):
 def remove_all_CR(custom_objects_api):
     remove_all_apples(custom_objects_api)
     remove_all_peaches(custom_objects_api)
+
+
+def assertIsSubsetOf(d1, d2):
+    ''' A crusty function to deal with nested dictionaries '''
+    if isinstance(d1, str) or isinstance(d1, int):
+        return d1 == d2
+    elif isinstance(d1, dict):
+        for key, value in d1.items():
+            assert key in d2
+            assert assertIsSubsetOf(value, d2[key])
+        return True
+    else:
+        return False
