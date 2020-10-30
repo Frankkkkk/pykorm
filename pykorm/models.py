@@ -6,8 +6,6 @@ from . import fields
 from . import query as pykorm_query
 from .meta import ModelMixin
 
-IGNORE_HIDDEN_ATTRIBUTE = True
-
 
 class PykormModel(ModelMixin):
     name: str = fields.Metadata('name', readonly=True)
@@ -27,18 +25,6 @@ class PykormModel(ModelMixin):
         ''' Converts a labels_dict to a k=v,k=v string '''
         return ','.join([f'{k}={v}' for k, v in d.items()])
 
-    def to_dict(self):
-        data = {}
-        for attr_name, _ in self._get_attributes().items():
-            v = getattr(self, attr_name)
-            if v is None:
-                continue
-            data[attr_name] = v
-        for attr_name, _attr_method in self._property_fields.items():
-            data[attr_name] = getattr(self, attr_name)
-
-        return {k: v for k, v in data.items() if not (k.startswith('_') and IGNORE_HIDDEN_ATTRIBUTE)}
-
     def _matches_attributes(self, filters_dict: Dict[str, str]) -> bool:
         for attribute_name, attribute_value in filters_dict.items():
             if getattr(self, attribute_name) != attribute_value:
@@ -50,11 +36,8 @@ class PykormModel(ModelMixin):
             return False
         return self._k8s_dict == other._k8s_dict
 
-
     def __hash__(self):
         return hash(self._k8s_uid)
-
-
 
     @classmethod
     def _instantiate_with_dict(cls, k8s_dict, queryset) -> 'PykormModel':
@@ -64,7 +47,6 @@ class PykormModel(ModelMixin):
         obj._queryset = queryset
         return obj
 
-
     def _set_attributes_with_dict(self, k8s_dict: Dict):
         self.__k8s_data = k8s_dict
         self._k8s_dict_cached = {}
@@ -72,7 +54,6 @@ class PykormModel(ModelMixin):
         for (attr_name, attr) in self._get_attributes().items():
             value = attr.get_data(k8s_dict)
             self.__dict__[attr_name] = value
-
 
     @property
     def _k8s_dict(self):
@@ -124,3 +105,6 @@ class NamespacedModel(PykormModel):
 class ClusterModel(PykormModel):
     pass
 
+
+class Nested(ModelMixin):
+    pass

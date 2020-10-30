@@ -6,19 +6,23 @@ import pytest
 import pykorm
 
 
-@pykorm.k8s_custom_object('pykorm.infomaniak.com', 'v1', 'apples')
-class Apple(pykorm.ClusterModel):
-    variety: str = pykorm.fields.Spec('variety', 'default-variety')
-    tastyness: str = pykorm.fields.MetadataAnnotation('tastyness', 'very-tasty')
-    creationTimestamp: str = pykorm.fields.Metadata('creationTimestamp', readonly=True)
+class Score(pykorm.models.Nested):
+    exterior: int = pykorm.fields.DataField('exterior')
+    delicious: int = pykorm.fields.DataField('delicious', 10)
 
-    def __init__(self, name: str, variety: str):
-        self.name = name
-        self.variety = variety
+
+class ScoreMixin(object):
+    score: Score = pykorm.fields.DictNestedField(Score, path=['spec', 'score'])
+
+
+@pykorm.k8s_custom_object('pykorm.infomaniak.com', 'v1', 'apples')
+class Apple(ScoreMixin, pykorm.ClusterModel):
+    variety: str = pykorm.fields.Spec('variety', 'default-variety')
+    price: str = pykorm.fields.Spec('price', 1)
 
 
 @pykorm.k8s_custom_object('pykorm.infomaniak.com', 'v1', 'peaches')
-class Peach(pykorm.NamespacedModel):
+class Peach(ScoreMixin, pykorm.NamespacedModel):
     variety: str = pykorm.fields.Spec('variety', 'default-variety')
     price: str = pykorm.fields.Spec('price', 1)
 
@@ -61,3 +65,16 @@ def remove_all_peaches(custom_objects_api):
 def remove_all_CR(custom_objects_api):
     remove_all_apples(custom_objects_api)
     remove_all_peaches(custom_objects_api)
+
+
+def assertIsSubsetOf(d1, d2):
+    ''' A crusty function to deal with nested dictionaries '''
+    if isinstance(d1, str) or isinstance(d1, int):
+        return d1 == d2
+    elif isinstance(d1, dict):
+        for key, value in d1.items():
+            assert key in d2
+            assert assertIsSubsetOf(value, d2[key])
+        return True
+    else:
+        return False
