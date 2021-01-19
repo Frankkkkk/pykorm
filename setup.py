@@ -9,7 +9,7 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='pykorm',
-    version='0.52.0',
+    version='0.53.0',
     description='Pykorm: a dead simple Kubernetes ORM',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -25,9 +25,9 @@ setup(
         "Intended Audience :: Developers",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Operating System :: POSIX :: Linux",
-        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: Implementation :: PyPy",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
-    python_requires=">=3.7",
+    python_requires=">=3.6",
     install_requires=['kubernetes>=11.0', 'dpath==2.0.1'])
