@@ -28,6 +28,16 @@ class Peach(ScoreMixin, pykorm.NamespacedModel):
     colours: list = pykorm.fields.Spec('colours', [])
 
 
+@pykorm.pykorm.k8s_core(kind='Namespace')
+class Namespace(pykorm.models.ClusterModel):
+    pass
+
+
+@pykorm.pykorm.k8s_core(kind='Pod')
+class Pod(pykorm.models.NamespacedModel):
+    pass
+
+
 @pytest.fixture
 def random_name():
     return uuid.uuid4().hex
