@@ -199,19 +199,18 @@ class BaseQuery(Node):
 class NamespacedObjectQuery(BaseQuery):
     def _iter(self, **kwargs) -> Iterator['NamespacedModel']:
         base_cls = self.baseobject
-        ns_name = kwargs.get('namespace', None)
-        namespaces = {kwargs.get('namespace', 'default')}
+        namespace = kwargs.get('namespace', None)
+        method = self.list_method
+        method_kwargs = self.process_method_kwargs(base_cls, with_labels=True, namespace=namespace)
 
-        if not ns_name:
-            corev1 = kubernetes.client.CoreV1Api(self.api_client)
-            for namespace in corev1.list_namespace().items:
-                ns_name = namespace.metadata.name
-                namespaces.add(ns_name)
-        for ns_name in namespaces:
-            objs = self.process_http_response(
-                self.list_method(**self.process_method_kwargs(base_cls, with_labels=True, namespace=ns_name)))
-            for obj in objs['items']:
-                yield self.baseobject._instantiate_with_dict(obj, queryset=self)
+        # No namespace, no problem. Search cluster wide.
+        if not namespace:
+            method = self.list_method_cluster
+            del method_kwargs['namespace']  # Clean up needed to avoid an API error
+
+        objs = self.process_http_response(method(**method_kwargs))
+        for obj in objs['items']:
+            yield self.baseobject._instantiate_with_dict(obj, queryset=self)
 
     @property
     def get_method(self):
@@ -222,6 +221,12 @@ class NamespacedObjectQuery(BaseQuery):
     @property
     def list_method(self):
         return getattr(self.api, f'list_namespaced_{self.api_resource_name}')
+
+    @property
+    def list_method_cluster(self):
+        if self.is_crd:
+            return getattr(self.api, f'list_cluster_{self.api_resource_name}')
+        return getattr(self.api, f'list_{self.api_resource_name}_for_all_namespaces')
 
     @property
     def patch_method(self):
