@@ -25,6 +25,10 @@ spec:
                   type: string
                 price:
                   type: integer
+                colours:
+                  type: array
+                  items:
+                    type: string
                 score:
                   type: object
                   properties:

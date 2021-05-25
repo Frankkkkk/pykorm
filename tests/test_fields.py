@@ -1,3 +1,4 @@
+from tests.conftest import Peach
 from pykorm import fields
 from pykorm.models import Nested
 
@@ -164,3 +165,11 @@ def test_metadata_annotations_field():
 def test_metadata_annotations_field_default():
     md = fields.MetadataAnnotation('ch.infomaniak.pykorm/foo.bar', 'default')
     assert md.get_data({}) == 'default'
+
+
+def test_field_copy_default():
+    p1 = Peach(namespace='default', name='blue-peach')
+    p1.colours.append('blue')
+
+    p2 = Peach(namespace='default', name='colourless-peach')
+    assert p2.colours == []  # `colours` field default attribute is []
