@@ -1,3 +1,4 @@
+import copy
 import inspect
 from typing import Dict
 
@@ -79,7 +80,7 @@ class ModelMixin(metaclass=ModelMeta):
         attr = object.__getattribute__(self, item)
 
         if isinstance(attr, fields.DataField):
-            return attr.default
+            return copy.deepcopy(attr.default)
         else:
             return attr
 

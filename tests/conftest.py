@@ -25,6 +25,7 @@ class Apple(ScoreMixin, pykorm.ClusterModel):
 class Peach(ScoreMixin, pykorm.NamespacedModel):
     variety: str = pykorm.fields.Spec('variety', 'default-variety')
     price: str = pykorm.fields.Spec('price', 1)
+    colours: list = pykorm.fields.Spec('colours', [])
 
 
 @pytest.fixture
