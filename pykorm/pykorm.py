@@ -74,9 +74,12 @@ class Pykorm:
         # Load other cluster if specified in configuration
         if clusters_config:
             for cluster_name, api_config in clusters_config.items():
-                configuration = kubernetes.client.Configuration()
-                for k, v in api_config.items():
-                    setattr(configuration, k, v)
+                if isinstance(api_config, kubernetes.client.Configuration):
+                    configuration = api_config
+                else:
+                    configuration = kubernetes.client.Configuration()
+                    for k, v in api_config.items():
+                        setattr(configuration, k, v)
 
                 api_client_mapping[cluster_name] = kubernetes.client.ApiClient(configuration)
         return api_client_mapping
