@@ -48,6 +48,22 @@ def test_update(pk):
     assert [a] == list(all_peaches)
 
 
+def test_apply(pk):
+    a = Peach(namespace='default', name='my-peach', variety='Babcock')
+    pk.apply(a)
+
+    all_peaches = Peach.query.all()
+    assert [a] == list(all_peaches)
+
+    b = Peach(namespace='default', name='my-peach', variety='Peento')
+    pk.apply(b)
+
+    all_peach = Peach.query.all()
+    peach = all_peach[0]
+
+    assert peach.name == 'my-peach'
+    assert peach.variety == 'Peento'
+
 
 def test_delete(pk):
     a = Peach(namespace='default', name='a', variety='b')
