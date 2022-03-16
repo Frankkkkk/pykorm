@@ -2,7 +2,9 @@ import uuid
 
 import kubernetes
 import pytest
+import sys
 
+sys.path.append('../')
 import pykorm
 
 

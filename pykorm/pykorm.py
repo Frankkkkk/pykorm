@@ -91,4 +91,4 @@ class Pykorm:
         obj.query().using(cluster)._delete(obj)
 
     def apply(self, obj: 'models.PykormModel', cluster: str = 'default'):
-        raise Exception('Please use save() instead')
+        obj.query().using(cluster)._apply(obj)

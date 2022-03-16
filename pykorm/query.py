@@ -186,8 +186,8 @@ class BaseQuery(Node):
         try:
             result = self.create_method(**self.process_method_kwargs(obj, body=k8s_dict))
         except ApiException as e:
-            if e.status == 404:
-                result = self.patch_method(**self.process_method_kwargs(obj, body=k8s_dict))
+            if e.status == 409:
+                result = self.patch_method(name=obj.name, **self.process_method_kwargs(obj, body=k8s_dict))
 
         obj._set_attributes_with_dict(self.process_http_response(result))
 
