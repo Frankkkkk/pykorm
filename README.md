@@ -72,7 +72,7 @@ import pykorm
 pk = pykorm.Pykorm()
 
 cake_peach = Peach(namespace='default', name='cake-peach', variety='Frost')
-pk.save(cake_peach) # pk.apply(cake_peach) # you can apply resource
+pk.save(cake_peach)  # We save the resource
 ```
 as you can see, the model is instantly ensured in kubernetes:
 ```bash
