@@ -66,7 +66,12 @@ class Pykorm:
             # To be changed once https://github.com/kubernetes-client/python/issues/1005 is fixed
             kubernetes.config.load_kube_config()
         except kubernetes.config.config_exception.ConfigException:
-            kubernetes.config.load_incluster_config()
+            try:
+                kubernetes.config.load_incluster_config()
+            except:
+                # Not a problem for now a users can later specify a custom kubeconfig
+                # with pykorm.Pykorm.clusters_config = dict[cluster_name, kubeconfig]
+                pass
 
         api_client = kubernetes.client.ApiClient()
         api_client_mapping['default'] = api_client
