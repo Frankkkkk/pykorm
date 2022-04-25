@@ -12,8 +12,8 @@ pytest = "*"
 kubetest = "*"
 
 [packages]
-kubernetes = ">=11.0"
+kubernetes = "==11.0"
 dpath = "*"
 
 [requires]
-python_version = "3.7"
+python_version = "3.8"
