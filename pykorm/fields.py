@@ -79,12 +79,16 @@ class ListField(DataField):
         self.dict_nested_field = DictNestedField(nested_type=nested_type, path=[])
 
     def to_dict(self, multi_nested_value: list) -> Dict:
+        # Allow None as a value to enable using crd's default (the api considers [] to be a value and won't use default)
+        if not multi_nested_value:
+            return dpath.util.new({}, self.fullpath, None)
+
         result = []
         for nested_value in multi_nested_value:
             result.append(
                 self.dict_nested_field.to_dict(nested_value)
             )
-        return dpath.util.new({}, self.path, result)
+        return dpath.util.new({}, self.fullpath, result)
 
     def get_data(self, k8s_dict: Dict):
         ret = []
