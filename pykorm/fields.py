@@ -88,7 +88,7 @@ class ListField(DataField):
             result.append(
                 self.dict_nested_field.to_dict(nested_value)
             )
-        return dpath.util.new({}, self.path, result)
+        return dpath.util.new({}, self.fullpath, result)
 
     def get_data(self, k8s_dict: Dict):
         ret = []
