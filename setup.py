@@ -9,7 +9,7 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='pykorm',
-    version='0.58.0',
+    version='0.60.0',
     description='Pykorm: a dead simple Kubernetes ORM',
     long_description=long_description,
     long_description_content_type='text/markdown',
