@@ -26,6 +26,7 @@ class Peach(ScoreMixin, pykorm.NamespacedModel):
     variety: str = pykorm.fields.Spec('variety', 'default-variety')
     price: str = pykorm.fields.Spec('price', 1)
     colours: list = pykorm.fields.Spec('colours', [])
+    scores: [Score] = pykorm.fields.ListField(Score, path=['scores'])
 
 
 @pykorm.pykorm.k8s_core(kind='Namespace')

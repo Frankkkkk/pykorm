@@ -23,6 +23,16 @@ def test_filter_attr(pk):
     assert(b_peaches == all_peaches['b'])
 
 
+def test_filter_undefined_listfield(pk):
+    peach = Peach(namespace='default', name='delicious', variety='a')
+    pk.apply(peach)
+
+    a_peach = Peach.query.filter_by(namespace='default', name='delicious').all()
+    assert a_peach is not None
+    assert len(a_peach) > 0
+    assert len(a_peach) == 1
+
+
 def test_filter_chain(pk):
     all_peaches = {}
     for variety in ['a', 'b', 'c']:

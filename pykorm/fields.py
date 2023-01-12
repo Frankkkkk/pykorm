@@ -92,9 +92,13 @@ class ListField(DataField):
 
     def get_data(self, k8s_dict: Dict):
         ret = []
-        full_items = dpath.util.get(k8s_dict, self.fullpath) or []
-        for sub_dict in full_items:
-            ret.append(self.dict_nested_field.get_data(sub_dict))
+        try:
+            full_items = dpath.util.get(k8s_dict, self.fullpath) or []
+            for sub_dict in full_items:
+                ret.append(self.dict_nested_field.get_data(sub_dict))
+        except KeyError:
+            if self.required:
+                raise Exception(f'ListField {self.path} is required.')
         return ret
 
 
